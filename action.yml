@@ -1,0 +1,68 @@
+name: "HaluGuard"
+description: "Catch AI hallucinations before they ship — detects invented APIs, leaked secrets, malicious packages, and stubs in AI-generated code. Local-first, zero-config, no cloud."
+author: "haluguard"
+
+inputs:
+  format:
+    description: "Output format: pretty, json, or sarif"
+    required: false
+    default: "pretty"
+  min_severity:
+    description: "Minimum severity to report: info, low, medium, high, critical"
+    required: false
+    default: "info"
+  detectors:
+    description: "Comma-separated detector IDs to run (empty = all)"
+    required: false
+    default: ""
+  ignore:
+    description: "Comma-separated glob patterns to ignore"
+    required: false
+    default: ""
+  fail_on:
+    description: "Exit non-zero at or above this severity: never, low, medium, high, critical"
+    required: false
+    default: "high"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install HaluGuard
+      shell: bash
+      run: npm install -g haluguard
+
+    - name: Detect changed files
+      id: files
+      shell: bash
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          git fetch origin "${{ github.base_ref }}" --depth=1 2>/dev/null || true
+          FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" 2>/dev/null || git diff --name-only HEAD~1)
+          echo "changed=$FILES" >> "$GITHUB_OUTPUT"
+          echo "has_changes=$([ -n \"$FILES\" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        else
+          echo "has_changes=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run HaluGuard
+      if: steps.files.outputs.has_changes == 'true'
+      shell: bash
+      env:
+        INPUT_FORMAT: ${{ inputs.format }}
+        INPUT_MIN_SEVERITY: ${{ inputs.min_severity }}
+        INPUT_DETECTORS: ${{ inputs.detectors }}
+        INPUT_IGNORE: ${{ inputs.ignore }}
+        INPUT_FAIL_ON: ${{ inputs.fail_on }}
+      run: |
+        ARGS=()
+        [ -n "$INPUT_FORMAT" ] && ARGS+=(--format "$INPUT_FORMAT")
+        [ -n "$INPUT_MIN_SEVERITY" ] && ARGS+=(--min-severity "$INPUT_MIN_SEVERITY")
+        [ -n "$INPUT_DETECTORS" ] && ARGS+=(--detectors "$INPUT_DETECTORS")
+        [ -n "$INPUT_FAIL_ON" ] && ARGS+=(--fail-on "$INPUT_FAIL_ON")
+        for pattern in $(echo "$INPUT_IGNORE" | tr ',' '\n'); do
+          [ -n "$pattern" ] && ARGS+=(--ignore "$pattern")
+        done
+
+        echo "::group::HaluGuard output"
+        haluguard "${ARGS[@]}" ${{ steps.files.outputs.changed }}
+        echo "::endgroup::"

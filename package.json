@@ -1,0 +1,65 @@
+{
+  "name": "haluguard",
+  "version": "0.1.0",
+  "description": "Catch AI hallucinations before they ship. Detects invented APIs, leaked secrets, malicious packages, and stubs in AI-generated code. Local-first, zero-config, no cloud.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "",
+  "homepage": "https://github.com/yadavnikhil03/haluguard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yadavnikhil03/haluguard.git"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "hallucination",
+    "hallucinated-api",
+    "security",
+    "code-review",
+    "static-analysis",
+    "secrets-detection",
+    "github-action",
+    "supply-chain",
+    "copilot",
+    "cursor",
+    "cline",
+    "aider",
+    "pre-commit",
+    "ci-cd",
+    "sarif",
+    "typescript",
+    "python"
+  ],
+  "bin": {
+    "haluguard": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "action.yml", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.0",
+    "glob": "^13.0.6",
+    "strip-comments": "^2.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
