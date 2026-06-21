@@ -207,3 +207,5 @@ To add a detector, create a file in `src/detectors/` implementing the `Detector`
 ## License
 
 [Apache License 2.0](LICENSE) © 2026
+
+# Note: to see a demo run, you can use examples/vulnerable-demo.ts

@@ -20,7 +20,7 @@ export function renderSarif(report: ScanReport): string {
         tool: {
           driver: {
             name: "haluguard",
-            informationUri: "https://github.com/your-org/haluguard",
+            informationUri: "https://github.com/yadavnikhil03/haluguard",
             version: "0.1.0",
             rules,
           },
