@@ -21,4 +21,4 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: node dist/cli.js --help
-      - run: node dist/cli.js examples/bad-ai-output.ts
+      - run: node dist/cli.js examples/bad-ai-output.ts --fail-on critical
