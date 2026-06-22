@@ -1,0 +1,49 @@
+name: Bug Report
+description: Report a bug, false positive, or crash in HaluGuard
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: HaluGuard flagged a real API as hallucinated, or crashed on my file...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Code / Steps
+      description: Please provide the code snippet or diff that triggered the bug.
+      placeholder: |
+        ```typescript
+        const validCall = library.existingMethod();
+        ```
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: HaluGuard Version
+      description: Which version of HaluGuard are you using? (Run `haluguard --version`)
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where are you running HaluGuard?
+      options:
+        - CLI (macOS)
+        - CLI (Windows)
+        - CLI (Linux)
+        - GitHub Actions
+        - Other CI
+    validations:
+      required: true

@@ -26,7 +26,13 @@ export interface ParsedArgs {
 }
 
 const HELP = `
-  🛡️  haluguard — catch AI hallucinations before they ship
+   _   _       _         ___                     _ 
+  | | | | __ _| |_   _  / _ \\_   _  __ _ _ __ __| |
+  | |_| |/ _\` | | | | |/ /_\\/ | | |/ _\` | '__/ _\` |
+  |  _  | (_| | | |_| / /_\\\\| |_| | (_| | | | (_| |
+  |_| |_|\\__,_|_|\\__,_\\____/ \\__,_|\\__,_|_|  \\__,_|
+                                                   
+      Catch AI hallucinations before they ship.
 
   USAGE
     haluguard <diff-or-files...>      Scan files or a unified diff

@@ -1,13 +1,12 @@
 <p align="center">
-  <h1 align="center">🛡️ HaluGuard</h1>
-  <p align="center"><strong>Catch AI hallucinations before they ship.</strong></p>
+  <img src="./assets/banner.png" alt="HaluGuard Banner" width="100%">
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/haluguard"><img alt="npm" src="https://img.shields.io/npm/v/haluguard?style=flat-square&color=blue"></a>
+  <a href="https://github.com/yadavnikhil03/haluguard/actions"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/haluguard.yml?style=flat-square"></a>
   <img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-3DA639?style=flat-square">
   <img alt="node" src="https://img.shields.io/badge/node-%3E%3D18-cc3366?style=flat-square">
-  <img alt="tests" src="https://img.shields.io/badge/tests-42%20passing-5849be?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-66%20passing-5849be?style=flat-square">
   <img alt="config" src="https://img.shields.io/badge/zero%20config-22c55e?style=flat-square">
 </p>
 
@@ -54,12 +53,25 @@ src/auth.ts
 Scanned 1 files, 19 added lines in 4ms
 ```
 
-## Install
+## Install & Run
+
+You can run HaluGuard directly from GitHub without needing to install anything:
 
 ```sh
-npm install -g haluguard
-# or one-shot:
-npx haluguard src/auth.ts
+# Run once via NPX (fetches directly from this repo)
+npx github:yadavnikhil03/haluguard src/auth.ts
+```
+
+If you prefer to install it globally on your machine:
+
+```sh
+# Clone and install globally
+git clone https://github.com/yadavnikhil03/haluguard.git
+cd haluguard
+npm install -g .
+
+# Now you can use it anywhere
+haluguard src/auth.ts
 ```
 
 ## Quick start
