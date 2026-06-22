@@ -89,7 +89,7 @@ haluguard --stdin --fail-on high < diff.patch
 | **`secrets`** | 🔴 HIGH/CRIT | AWS, GitHub, OpenAI, Anthropic, Stripe, Slack keys, JWTs, private keys, + generic high-entropy tokens |
 | **`stubs`** | 🟡 MED / ℹ️ INFO | `throw new Error("not implemented")`, `NotImplementedError`, bare `pass`, `TODO`/`FIXME`, `dummy_value` returns |
 
-**Languages:** TypeScript, JavaScript, TSX, JSX, Python (stdlib + curated), Go (stdlib). Rust/Java/PHP/Ruby/C# partially supported (stubs + secrets).
+**Languages:** TypeScript, JavaScript, TSX, JSX, Python, Go, Rust, Java, C#, PHP.
 
 ## GitHub Action
 
@@ -233,10 +233,9 @@ console.log(renderReport(report));
 - [x] `.haluguard.yml` config file (rules, ignore, baselines)
 - [x] Inline `// haluguard: ignore` directives
 - [x] Pre-commit hook
-- [x] Go stdlib support for hallucinated APIs
+- [x] Go, Rust, Java, C#, PHP, Python support for hallucinated APIs
 - [ ] `malicious_packages` detector (typosquat / hijack detection via OpenSSF)
 - [ ] `ai_logic` LLM-as-judge detector (optional, BYO key)
-- [ ] Rust, Java, full Python support for hallucinated APIs
 - [ ] VS Code extension
 
 ## Contributing

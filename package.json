@@ -36,12 +36,7 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "action.yml",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist", "action.yml", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

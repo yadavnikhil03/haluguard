@@ -6,7 +6,7 @@ const run = (path: string, content: string) =>
   hallucinatedApiDetector.run({
     files: [parseFileContent(path, content)],
     options: { cwd: process.cwd() },
-  });
+  }) as import("../src/types.js").DetectorResult;
 
 describe("hallucinated-apis detector", () => {
   it("flags an invented crypto method and suggests the real one", () => {
@@ -99,6 +99,46 @@ describe("hallucinated-apis detector", () => {
 
   it("does not flag valid Go strings methods", () => {
     const r = run("a.go", `import "strings"\nstrings.Contains("hello", "ell")`);
+    expect(r.findings).toHaveLength(0);
+  });
+
+  it("flags Java hallucinated methods", () => {
+    const r = run("a.java", "import java.util.List;\nList.sortList()");
+    expect(r.findings.some((f) => f.title.includes("List.sortList"))).toBe(true);
+  });
+
+  it("does not flag valid Java methods", () => {
+    const r = run("a.java", "import java.util.List;\nList.sort()");
+    expect(r.findings).toHaveLength(0);
+  });
+
+  it("flags Rust hallucinated methods", () => {
+    const r = run("a.rs", "use std::fs;\nfs::read_file_sync()");
+    expect(r.findings.some((f) => f.title.includes("fs::read_file_sync"))).toBe(true);
+  });
+
+  it("does not flag valid Rust methods", () => {
+    const r = run("a.rs", "use std::fs;\nfs::read_to_string()");
+    expect(r.findings).toHaveLength(0);
+  });
+
+  it("flags C# hallucinated methods", () => {
+    const r = run("a.cs", "using System.IO;\nFile.ReadAllTextSync()");
+    expect(r.findings.some((f) => f.title.includes("File.ReadAllTextSync"))).toBe(true);
+  });
+
+  it("does not flag valid C# methods", () => {
+    const r = run("a.cs", "using System.IO;\nFile.ReadAllText()");
+    expect(r.findings).toHaveLength(0);
+  });
+
+  it("flags PHP hallucinated methods", () => {
+    const r = run("a.php", "use PDO;\nPDO::connect()");
+    expect(r.findings.some((f) => f.title.includes("PDO::connect"))).toBe(true);
+  });
+
+  it("does not flag valid PHP methods", () => {
+    const r = run("a.php", "use PDO;\nPDO::prepare()");
     expect(r.findings).toHaveLength(0);
   });
 
