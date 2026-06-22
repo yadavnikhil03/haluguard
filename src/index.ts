@@ -1,6 +1,7 @@
 export { parseDiff, parseFileContent } from "./core/parse-diff.js";
 export { detectLanguage, isSupportedLanguage } from "./core/language.js";
 export { runScan } from "./core/engine.js";
+export { loadConfig, mergeConfigWithOptions, type HaluGuardConfig } from "./core/config.js";
 export {
   registerDetector,
   listDetectors,

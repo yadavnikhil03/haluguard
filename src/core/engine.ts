@@ -42,7 +42,7 @@ export async function runScan(
 
   const results = await Promise.all(selected.map((d) => runOne(d, files, options)));
 
-  const findings = applyFilters(results, options);
+  const findings = applyFilters(results, options, files);
   const linesScanned = files.reduce((n, f) => n + f.addedLines.length, 0);
 
   return {
@@ -80,21 +80,60 @@ async function runOne(
   }
 }
 
-function applyFilters(results: DetectorResult[], options: ScanOptions): Finding[] {
+function applyFilters(
+  results: DetectorResult[],
+  options: ScanOptions,
+  files: FileChange[],
+): Finding[] {
   const minSeverity = Severity[options.minSeverity ?? "info"];
   const ignoreMatchers = (options.ignore ?? []).map((g) => globToRegExp(g));
+  const rawLinesMap = buildRawLinesMap(files);
 
   const merged: Finding[] = [];
   for (const r of results) {
     for (const f of r.findings) {
       if (Severity[f.severity] < minSeverity) continue;
       if (ignoreMatchers.some((re) => re.test(f.location.file))) continue;
+      if (isIgnoredByDirective(f, rawLinesMap)) continue;
       merged.push(f);
     }
   }
 
   merged.sort(bySeverityThenLocation);
   return dedupe(merged);
+}
+
+function buildRawLinesMap(files: FileChange[]): Map<string, Map<number, string>> {
+  const map = new Map<string, Map<number, string>>();
+  for (const f of files) {
+    if (f.rawLines) map.set(f.path, f.rawLines);
+  }
+  return map;
+}
+
+const IGNORE_PATTERN = /haluguard:\s*ignore(?:\s+([\w:,\s]+))?/;
+
+function isIgnoredByDirective(
+  finding: Finding,
+  rawLinesMap: Map<string, Map<number, string>>,
+): boolean {
+  const fileLines = rawLinesMap.get(finding.location.file);
+  if (!fileLines) return false;
+
+  const linesToCheck = [
+    fileLines.get(finding.location.startLine),
+    fileLines.get(finding.location.startLine - 1),
+  ];
+
+  for (const lineText of linesToCheck) {
+    if (!lineText) continue;
+    const match = IGNORE_PATTERN.exec(lineText);
+    if (!match) continue;
+    if (!match[1]) return true;
+    const ids = match[1].split(/[,\s]+/).filter(Boolean);
+    if (ids.includes(finding.id) || ids.includes(finding.detector)) return true;
+  }
+  return false;
 }
 
 function bySeverityThenLocation(a: Finding, b: Finding): number {

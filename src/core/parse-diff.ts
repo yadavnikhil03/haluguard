@@ -16,10 +16,15 @@ export function parseDiff(diff: string): FileChange[] {
 
   const flush = () => {
     if (current?.newPath) {
+      const rawLines = new Map<number, string>();
+      for (const line of current.hunks) {
+        rawLines.set(line.lineNumber, line.text);
+      }
       files.push({
         path: current.newPath,
         language: detectLanguage(current.newPath),
         addedLines: current.hunks,
+        rawLines,
       });
     }
     current = null;
@@ -71,14 +76,20 @@ export function parseDiff(diff: string): FileChange[] {
 }
 
 export function parseFileContent(path: string, content: string): FileChange {
-  const addedLines: DiffLine[] = content.split(/\r?\n/).map((text, i) => ({
+  const splitLines = content.split(/\r?\n/);
+  const addedLines: DiffLine[] = splitLines.map((text, i) => ({
     lineNumber: i + 1,
     text,
   }));
+  const rawLines = new Map<number, string>();
+  for (const line of addedLines) {
+    rawLines.set(line.lineNumber, line.text);
+  }
   return {
     path,
     language: detectLanguage(path),
     addedLines,
     newContent: content,
+    rawLines,
   };
 }

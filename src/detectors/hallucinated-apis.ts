@@ -198,7 +198,8 @@ export const hallucinatedApiDetector: Detector = {
         file.language !== "javascript" &&
         file.language !== "tsx" &&
         file.language !== "jsx" &&
-        file.language !== "python"
+        file.language !== "python" &&
+        file.language !== "go"
       ) {
         continue;
       }
@@ -274,6 +275,25 @@ function collectImports(language: FileLanguage, lines: DiffLine[]): ImportBindin
       continue;
     }
 
+    if (language === "go") {
+      const goSingle = /^\s*import\s+(?:(\w+)\s+)?"([^"]+)"/.exec(text);
+      if (goSingle) {
+        const alias = goSingle[1];
+        const pkg = goSingle[2];
+        const base = pkg.includes("/") ? pkg.slice(pkg.lastIndexOf("/") + 1) : pkg;
+        record(alias ?? base, pkg);
+        continue;
+      }
+      const goGrouped = /^\s*(?:(\w+)\s+)?"([^"]+)"/.exec(text);
+      if (goGrouped) {
+        const alias = goGrouped[1];
+        const pkg = goGrouped[2];
+        const base = pkg.includes("/") ? pkg.slice(pkg.lastIndexOf("/") + 1) : pkg;
+        record(alias ?? base, pkg);
+      }
+      continue;
+    }
+
     const defaultImport = /^\s*import\s+([A-Za-z_$][\w$]*)\s+from\s+["']([^"']+)["']/.exec(text);
     if (defaultImport) {
       record(defaultImport[1], defaultImport[2]);
@@ -311,6 +331,12 @@ function namespaceKeyForSource(source: string, language: FileLanguage): string |
     return `py:${s.split(".")[0]}`;
   }
 
+  if (language === "go") {
+    const base = s.includes("/") ? s.slice(s.lastIndexOf("/") + 1) : s;
+    if (GO_STDLIB_MEMBERS[base]) return `go:${base}`;
+    return undefined;
+  }
+
   if (NODE_BUILTINS[s]) return s;
 
   if (PACKAGE_MEMBERS[s]) return s;
@@ -342,6 +368,7 @@ function resolveNamespace(
 function lookupMembers(key: string): Set<string> | undefined {
   if (NODE_BUILTINS[key]) return NODE_BUILTINS[key];
   if (key.startsWith("py:")) return PYTHON_STDLIB_MEMBERS[key.slice(3)];
+  if (key.startsWith("go:")) return GO_STDLIB_MEMBERS[key.slice(3)];
 
   const pkg = PACKAGE_MEMBERS[key];
   if (pkg) return pkg[key];
@@ -504,6 +531,227 @@ const PYTHON_STDLIB_MEMBERS: MemberDB = {
     "atan2",
     "degrees",
     "radians",
+  ]),
+};
+
+const GO_STDLIB_MEMBERS: MemberDB = {
+  fmt: new Set([
+    "Print",
+    "Println",
+    "Printf",
+    "Sprint",
+    "Sprintf",
+    "Sprintln",
+    "Fprint",
+    "Fprintf",
+    "Fprintln",
+    "Errorf",
+    "Scan",
+    "Scanf",
+    "Scanln",
+    "Sscan",
+    "Sscanf",
+    "Sscanln",
+    "Fscan",
+    "Fscanf",
+    "Fscanln",
+    "Stringer",
+    "GoStringer",
+    "Formatter",
+  ]),
+  os: new Set([
+    "Open",
+    "Create",
+    "OpenFile",
+    "ReadFile",
+    "WriteFile",
+    "Remove",
+    "RemoveAll",
+    "Mkdir",
+    "MkdirAll",
+    "Rename",
+    "Stat",
+    "Lstat",
+    "Getenv",
+    "Setenv",
+    "Unsetenv",
+    "LookupEnv",
+    "Environ",
+    "Exit",
+    "Getwd",
+    "Chdir",
+    "TempDir",
+    "UserHomeDir",
+    "UserConfigDir",
+    "UserCacheDir",
+    "Hostname",
+    "Getpid",
+    "Getppid",
+    "Getuid",
+    "Getgid",
+    "Args",
+    "Stdin",
+    "Stdout",
+    "Stderr",
+    "IsNotExist",
+    "IsExist",
+    "IsPermission",
+    "Expand",
+    "ExpandEnv",
+  ]),
+  strings: new Set([
+    "Contains",
+    "ContainsAny",
+    "ContainsRune",
+    "Count",
+    "Cut",
+    "EqualFold",
+    "Fields",
+    "HasPrefix",
+    "HasSuffix",
+    "Index",
+    "IndexAny",
+    "IndexByte",
+    "IndexFunc",
+    "IndexRune",
+    "Join",
+    "Map",
+    "Repeat",
+    "Replace",
+    "ReplaceAll",
+    "Split",
+    "SplitAfter",
+    "SplitAfterN",
+    "SplitN",
+    "Title",
+    "ToLower",
+    "ToTitle",
+    "ToUpper",
+    "Trim",
+    "TrimFunc",
+    "TrimLeft",
+    "TrimLeftFunc",
+    "TrimPrefix",
+    "TrimRight",
+    "TrimRightFunc",
+    "TrimSpace",
+    "TrimSuffix",
+    "NewReader",
+    "NewReplacer",
+    "Builder",
+  ]),
+  strconv: new Set([
+    "Atoi",
+    "Itoa",
+    "ParseBool",
+    "ParseFloat",
+    "ParseInt",
+    "ParseUint",
+    "FormatBool",
+    "FormatFloat",
+    "FormatInt",
+    "FormatUint",
+    "AppendBool",
+    "AppendFloat",
+    "AppendInt",
+    "AppendUint",
+    "Quote",
+    "QuoteRune",
+    "Unquote",
+    "UnquoteChar",
+  ]),
+  json: new Set([
+    "Marshal",
+    "MarshalIndent",
+    "Unmarshal",
+    "NewDecoder",
+    "NewEncoder",
+    "Compact",
+    "HTMLEscape",
+    "Indent",
+    "Valid",
+  ]),
+  http: new Set([
+    "Get",
+    "Post",
+    "PostForm",
+    "Head",
+    "ListenAndServe",
+    "ListenAndServeTLS",
+    "Handle",
+    "HandleFunc",
+    "Serve",
+    "ServeTLS",
+    "NewRequest",
+    "NewRequestWithContext",
+    "NewServeMux",
+    "FileServer",
+    "StripPrefix",
+    "NotFound",
+    "Redirect",
+    "Error",
+    "MaxBytesReader",
+    "StatusText",
+    "CanonicalHeaderKey",
+    "DetectContentType",
+    "ParseHTTPVersion",
+    "ProxyFromEnvironment",
+    "ProxyURL",
+  ]),
+  filepath: new Set([
+    "Abs",
+    "Base",
+    "Clean",
+    "Dir",
+    "Ext",
+    "FromSlash",
+    "Glob",
+    "HasPrefix",
+    "IsAbs",
+    "IsLocal",
+    "Join",
+    "Match",
+    "Rel",
+    "Split",
+    "SplitList",
+    "ToSlash",
+    "VolumeName",
+    "Walk",
+    "WalkDir",
+    "Separator",
+    "ListSeparator",
+  ]),
+  io: new Set([
+    "Copy",
+    "CopyBuffer",
+    "CopyN",
+    "ReadAll",
+    "ReadAtLeast",
+    "ReadFull",
+    "WriteString",
+    "Pipe",
+    "NopCloser",
+    "LimitReader",
+    "MultiReader",
+    "MultiWriter",
+    "TeeReader",
+    "NewSectionReader",
+    "NewOffsetWriter",
+    "Discard",
+    "EOF",
+  ]),
+  sync: new Set([
+    "Mutex",
+    "RWMutex",
+    "WaitGroup",
+    "Once",
+    "OnceFunc",
+    "OnceValue",
+    "OnceValues",
+    "Pool",
+    "Map",
+    "Cond",
+    "NewCond",
   ]),
 };
 

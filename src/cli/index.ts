@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { readFileSync, statSync } from "node:fs";
-import { extname } from "node:path";
+import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { extname, resolve } from "node:path";
 import process from "node:process";
 
+import { loadConfig, mergeConfigWithOptions } from "../core/config.js";
 import { registerBuiltinDetectors, runScan } from "../core/engine.js";
 import { parseDiff, parseFileContent } from "../core/parse-diff.js";
 import { renderReport } from "../reporters/cli-reporter.js";
@@ -26,6 +27,24 @@ async function main(): Promise<void> {
     process.stdout.write(`${VERSION}\n`);
     return;
   }
+  if (args.initHook) {
+    installPreCommitHook();
+    return;
+  }
+
+  const config = loadConfig(process.cwd(), args.config);
+  const { scanOptions, failOn } = mergeConfigWithOptions(
+    config,
+    {
+      cwd: process.cwd(),
+      detectors: args.detectors,
+      minSeverity: args.minSeverity !== "info" ? args.minSeverity : undefined,
+      ignore: args.ignore.length > 0 ? args.ignore : undefined,
+    },
+    args.failOn !== "high" ? args.failOn : undefined,
+  );
+
+  const resolvedFailOn = (failOn ?? args.failOn) as ParsedArgs["failOn"];
 
   const files = collectFiles(args);
   if (files.length === 0) {
@@ -35,13 +54,47 @@ async function main(): Promise<void> {
 
   const report = await runScan(files, {
     cwd: process.cwd(),
-    detectors: args.detectors,
-    minSeverity: args.minSeverity,
-    ignore: args.ignore,
+    ...scanOptions,
   });
 
   emit(report, args);
-  process.exitCode = decideExitCode(report, args.failOn);
+  process.exitCode = decideExitCode(report, resolvedFailOn);
+}
+
+function installPreCommitHook(): void {
+  const gitDir = resolve(process.cwd(), ".git");
+  if (!existsSync(gitDir)) {
+    process.stderr.write("haluguard: not a git repository (no .git directory found)\n");
+    process.exitCode = 1;
+    return;
+  }
+
+  const hooksDir = resolve(gitDir, "hooks");
+  if (!existsSync(hooksDir)) mkdirSync(hooksDir, { recursive: true });
+
+  const hookPath = resolve(hooksDir, "pre-commit");
+  if (existsSync(hookPath)) {
+    process.stderr.write(`haluguard: pre-commit hook already exists at ${hookPath}\n`);
+    process.stderr.write("haluguard: remove it manually first if you want to replace it\n");
+    process.exitCode = 1;
+    return;
+  }
+
+  const hookScript = [
+    "#!/bin/sh",
+    "# HaluGuard pre-commit hook — scans staged changes for AI hallucinations",
+    "DIFF=$(git diff --cached --unified=0)",
+    'if [ -z "$DIFF" ]; then exit 0; fi',
+    'echo "$DIFF" | npx haluguard --stdin --fail-on high',
+  ].join("\n");
+
+  writeFileSync(hookPath, `${hookScript}\n`, "utf-8");
+  try {
+    chmodSync(hookPath, 0o755);
+  } catch {
+    // chmod may fail on Windows, hook still works via git
+  }
+  process.stdout.write(`\u2705  Pre-commit hook installed at ${hookPath}\n`);
 }
 
 function collectFiles(args: ParsedArgs): FileChange[] {

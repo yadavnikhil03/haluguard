@@ -36,7 +36,12 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "action.yml", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -51,13 +56,12 @@
     "node": ">=18"
   },
   "dependencies": {
-    "picocolors": "^1.1.1"
+    "picocolors": "^1.1.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.0",
-    "glob": "^13.0.6",
-    "strip-comments": "^2.0.1",
     "tsup": "^8.3.6",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

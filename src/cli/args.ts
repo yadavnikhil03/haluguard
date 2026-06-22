@@ -19,6 +19,10 @@ export interface ParsedArgs {
   ignore: string[];
 
   failOn: "never" | "low" | "medium" | "high" | "critical";
+
+  config?: string;
+
+  initHook: boolean;
 }
 
 const HELP = `
@@ -37,6 +41,8 @@ const HELP = `
     --ignore <glob>                Ignore paths (repeatable)
     --fail-on <level>              Exit non-zero at/above severity (default: high)
     --stdin                        Read diff from stdin
+    --config <path>                Path to .haluguard.yml config file
+    --init-hook                    Install a pre-commit git hook
     -h, --help                     Show help
     -v, --version                  Print version
 
@@ -58,6 +64,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     minSeverity: "info",
     ignore: [],
     failOn: "high",
+    initHook: false,
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -107,6 +114,12 @@ export function parseArgs(argv: string[]): ParsedArgs {
       }
       case "--ignore":
         args.ignore.push(next() ?? "");
+        break;
+      case "--config":
+        args.config = next() ?? "";
+        break;
+      case "--init-hook":
+        args.initHook = true;
         break;
       default:
         if (a.startsWith("--")) throwUsage(`unknown option "${a}"`);

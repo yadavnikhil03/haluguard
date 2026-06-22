@@ -61,6 +61,8 @@ export interface FileChange {
   addedLines: DiffLine[];
 
   newContent?: string;
+
+  rawLines?: Map<number, string>;
 }
 
 export interface DiffLine {

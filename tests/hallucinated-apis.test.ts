@@ -82,8 +82,28 @@ describe("hallucinated-apis detector", () => {
     expect(r.findings.some((f) => f.title.includes("path.joins"))).toBe(true);
   });
 
-  it("ignores languages outside its scope", () => {
-    const r = run("a.go", "package main\nfunc main() { os.HostnameSync() }");
+  it("flags Go hallucinated methods", () => {
+    const r = run("a.go", `import "fmt"\nfmt.Printlnn("hello")`);
+    expect(r.findings.some((f) => f.title.includes("fmt.Printlnn"))).toBe(true);
+  });
+
+  it("does not flag valid Go stdlib methods", () => {
+    const r = run("a.go", `import "fmt"\nfmt.Println("hello")`);
+    expect(r.findings).toHaveLength(0);
+  });
+
+  it("supports Go aliased imports", () => {
+    const r = run("a.go", `import s "strings"\ns.Concats("a", "b")`);
+    expect(r.findings.some((f) => f.title.includes("s.Concats"))).toBe(true);
+  });
+
+  it("does not flag valid Go strings methods", () => {
+    const r = run("a.go", `import "strings"\nstrings.Contains("hello", "ell")`);
+    expect(r.findings).toHaveLength(0);
+  });
+
+  it("ignores languages fully outside its scope", () => {
+    const r = run("a.rb", "puts 'hello'");
     expect(r.findings).toHaveLength(0);
   });
 });

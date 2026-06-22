@@ -89,7 +89,7 @@ haluguard --stdin --fail-on high < diff.patch
 | **`secrets`** | 🔴 HIGH/CRIT | AWS, GitHub, OpenAI, Anthropic, Stripe, Slack keys, JWTs, private keys, + generic high-entropy tokens |
 | **`stubs`** | 🟡 MED / ℹ️ INFO | `throw new Error("not implemented")`, `NotImplementedError`, bare `pass`, `TODO`/`FIXME`, `dummy_value` returns |
 
-**Languages:** TypeScript, JavaScript, TSX, JSX, Python (stdlib + curated). Go/Rust/Java/PHP/Ruby/C# partially supported (stubs + secrets).
+**Languages:** TypeScript, JavaScript, TSX, JSX, Python (stdlib + curated), Go (stdlib). Rust/Java/PHP/Ruby/C# partially supported (stubs + secrets).
 
 ## GitHub Action
 
@@ -147,8 +147,56 @@ jobs:
 --ignore <glob>                Ignore paths (repeatable)
 --fail-on <level>              Exit non-zero at/above severity (default: high)
 --stdin                        Read diff from stdin
+--config <path>                Path to .haluguard.yml config file
+--init-hook                    Install a pre-commit git hook
 -h, --help                     Show help
 -v, --version                  Print version
+```
+
+## Configuration
+
+Create a `.haluguard.yml` in your project root:
+
+```yaml
+detectors:
+  - secrets
+  - hallucinated_apis
+  - stubs
+
+min_severity: medium
+
+ignore:
+  - "vendor/**"
+  - "*.test.ts"
+
+fail_on: high
+```
+
+CLI flags always take precedence over config file values.
+
+## Inline Ignores
+
+Suppress specific findings with inline directives:
+
+```typescript
+const key = "AKIAIOSFODNN7EXAMPLE"; // haluguard: ignore
+
+// haluguard: ignore secret:aws_access_key_id
+const key2 = "AKIAIOSFODNN7EXAMPLE";
+
+// haluguard: ignore secrets
+const key3 = "AKIAIOSFODNN7EXAMPLE";
+```
+
+Works on the same line or the line above. Supports Python `#` comments too.
+
+## Pre-commit Hook
+
+```sh
+# Auto-install:
+haluguard --init-hook
+
+# Or manually copy scripts/pre-commit-hook.sh to .git/hooks/pre-commit
 ```
 
 ## Programmatic API
@@ -182,13 +230,14 @@ console.log(renderReport(report));
 
 ## Roadmap
 
+- [x] `.haluguard.yml` config file (rules, ignore, baselines)
+- [x] Inline `// haluguard: ignore` directives
+- [x] Pre-commit hook
+- [x] Go stdlib support for hallucinated APIs
 - [ ] `malicious_packages` detector (typosquat / hijack detection via OpenSSF)
 - [ ] `ai_logic` LLM-as-judge detector (optional, BYO key)
-- [ ] Go, Rust, Java, full Python support for hallucinated APIs
-- [ ] `.haluguard.yml` config file (rules, ignore, baselines)
-- [ ] Inline `// haluguard: ignore` directives
+- [ ] Rust, Java, full Python support for hallucinated APIs
 - [ ] VS Code extension
-- [ ] Pre-commit hook
 
 ## Contributing
 
@@ -198,7 +247,7 @@ PRs welcome. HaluGuard is intentionally small and readable — the whole engine 
 git clone https://github.com/yadavnikhil03/haluguard.git
 cd haluguard
 npm install
-npm test        # 42 tests, <1s
+npm test        # 58 tests, <2s
 npm run build   # produces dist/
 ```
 
@@ -207,5 +256,3 @@ To add a detector, create a file in `src/detectors/` implementing the `Detector`
 ## License
 
 [Apache License 2.0](LICENSE) © 2026
-
-# Note: to see a demo run, you can use examples/vulnerable-demo.ts
