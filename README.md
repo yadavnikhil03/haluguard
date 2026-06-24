@@ -78,9 +78,21 @@ jobs:
 False positives can be programmatically suppressed using inline directives:
 
 ```typescript
-// Suppress analysis for a specific line
 const myCustomMethod = library.customMethod(); // haluguard: ignore
 ```
+
+## VS Code Extension
+
+HaluGuard ships with a VS Code extension that provides real-time diagnostics as you code. Hallucinated APIs, leaked secrets, and stubs appear as squiggly underlines directly in the editor.
+
+```sh
+npm run build
+cd vscode-extension
+npm install
+npm run compile
+```
+
+Then press **F5** in VS Code to launch the Extension Development Host. See the [extension README](vscode-extension/README.md) for configuration options.
 
 ## Contributing
 
