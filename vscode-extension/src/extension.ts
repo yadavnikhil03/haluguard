@@ -1,7 +1,24 @@
+import * as path from "node:path";
 import * as vscode from "vscode";
-import * as path from "path";
 
-let haluguardModule: any = null;
+interface HaluGuardEngine {
+  parseFileContent: (path: string, content: string) => unknown;
+  runScan: (files: unknown[], options: Record<string, unknown>) => Promise<ScanReport>;
+}
+
+interface ScanReport {
+  findings: Finding[];
+}
+
+interface Finding {
+  id: string;
+  severity: string;
+  message: string;
+  snippet?: string;
+  location: { file: string; startLine: number; endLine: number };
+}
+
+let haluguardModule: HaluGuardEngine | null = null;
 let diagnosticCollection: vscode.DiagnosticCollection;
 let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -13,10 +30,10 @@ const SEVERITY_MAP: Record<string, vscode.DiagnosticSeverity> = {
   info: vscode.DiagnosticSeverity.Hint,
 };
 
-async function loadEngine(): Promise<any> {
+async function loadEngine(): Promise<HaluGuardEngine> {
   if (haluguardModule) return haluguardModule;
   const enginePath = path.resolve(__dirname, "../../dist/index.js");
-  haluguardModule = await import(enginePath);
+  haluguardModule = (await import(enginePath)) as HaluGuardEngine;
   return haluguardModule;
 }
 
@@ -38,7 +55,7 @@ async function analyzeDocument(document: vscode.TextDocument): Promise<void> {
 
   if (!supportedLanguages.includes(document.languageId)) return;
 
-  let engine: any;
+  let engine: HaluGuardEngine;
   try {
     engine = await loadEngine();
   } catch {
@@ -75,7 +92,7 @@ async function analyzeDocument(document: vscode.TextDocument): Promise<void> {
 
     const range = new vscode.Range(
       new vscode.Position(line, startCol),
-      new vscode.Position(endLine, endCol)
+      new vscode.Position(endLine, endCol),
     );
 
     const severity = SEVERITY_MAP[finding.severity] ?? vscode.DiagnosticSeverity.Warning;
@@ -103,7 +120,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (config.get<boolean>("runOnSave", true)) {
         analyzeDocument(document);
       }
-    })
+    }),
   );
 
   context.subscriptions.push(
@@ -112,24 +129,24 @@ export function activate(context: vscode.ExtensionContext): void {
       if (config.get<boolean>("runOnType", false)) {
         scheduleAnalysis(event.document);
       }
-    })
+    }),
   );
 
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument((document) => {
       analyzeDocument(document);
-    })
+    }),
   );
 
   context.subscriptions.push(
     vscode.workspace.onDidCloseTextDocument((document) => {
       diagnosticCollection.delete(document.uri);
-    })
+    }),
   );
 
-  vscode.workspace.textDocuments.forEach((document) => {
+  for (const document of vscode.workspace.textDocuments) {
     analyzeDocument(document);
-  });
+  }
 }
 
 export function deactivate(): void {

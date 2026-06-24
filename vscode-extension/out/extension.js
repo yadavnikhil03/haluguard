@@ -35,8 +35,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
+const path = __importStar(require("node:path"));
 const vscode = __importStar(require("vscode"));
-const path = __importStar(require("path"));
 let haluguardModule = null;
 let diagnosticCollection;
 let debounceTimer;
@@ -51,7 +51,7 @@ async function loadEngine() {
     if (haluguardModule)
         return haluguardModule;
     const enginePath = path.resolve(__dirname, "../../dist/index.js");
-    haluguardModule = await Promise.resolve(`${enginePath}`).then(s => __importStar(require(s)));
+    haluguardModule = (await Promise.resolve(`${enginePath}`).then(s => __importStar(require(s))));
     return haluguardModule;
 }
 async function analyzeDocument(document) {
@@ -135,9 +135,9 @@ function activate(context) {
     context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((document) => {
         diagnosticCollection.delete(document.uri);
     }));
-    vscode.workspace.textDocuments.forEach((document) => {
+    for (const document of vscode.workspace.textDocuments) {
         analyzeDocument(document);
-    });
+    }
 }
 function deactivate() {
     if (debounceTimer)

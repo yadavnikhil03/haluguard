@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["dist", "node_modules", "coverage"]
+    "ignore": ["dist", "node_modules", "coverage", "vscode-extension/out"]
   },
   "formatter": {
     "enabled": true,
