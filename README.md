@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/yadavnikhil03/haluguard/actions"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/haluguard.yml?style=flat-square"></a>
+  <a href="https://github.com/yadavnikhil03/haluguard/actions"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/ci.yml?style=flat-square"></a>
   <img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-3DA639?style=flat-square">
   <img alt="node" src="https://img.shields.io/badge/node-%3E%3D18-cc3366?style=flat-square">
   <img alt="tests" src="https://img.shields.io/badge/tests-66%20passing-5849be?style=flat-square">
