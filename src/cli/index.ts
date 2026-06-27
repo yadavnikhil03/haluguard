@@ -46,7 +46,7 @@ async function main(): Promise<void> {
 
   const resolvedFailOn = (failOn ?? args.failOn) as ParsedArgs["failOn"];
 
-  const files = collectFiles(args);
+  const files = await collectFiles(args);
   if (files.length === 0) {
     process.stdout.write(renderReport(emptyReport()));
     return;
@@ -94,12 +94,12 @@ function installPreCommitHook(): void {
   } catch {
     // chmod may fail on Windows, hook still works via git
   }
-  process.stdout.write(`\u2705  Pre-commit hook installed at ${hookPath}\n`);
+  process.stdout.write(`[✓] Pre-commit hook installed at ${hookPath}\n`);
 }
 
-function collectFiles(args: ParsedArgs): FileChange[] {
+async function collectFiles(args: ParsedArgs): Promise<FileChange[]> {
   if (args.stdin) {
-    const diff = readStdin();
+    const diff = await readStdin();
     return parseDiff(diff);
   }
 

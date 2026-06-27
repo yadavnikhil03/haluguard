@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { extname } from "node:path";
 import process from "node:process";
 
 export interface ParsedArgs {
@@ -57,7 +55,7 @@ const HELP = `
     haluguard --format sarif $(git diff --name-only main) > results.sarif
     git diff origin/main | haluguard --stdin --format json
 
-  Detects: hallucinated_apis, secrets, stubs
+  Detects: hallucinated_apis, secrets, stubs, malicious_packages
 `;
 
 export function parseArgs(argv: string[]): ParsedArgs {
@@ -140,8 +138,14 @@ export function parseArgs(argv: string[]): ParsedArgs {
   return args;
 }
 
-export function readStdin(): string {
-  return readFileSync(0, "utf-8");
+export function readStdin(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    process.stdin.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+    process.stdin.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+    process.stdin.on("error", reject);
+    if (process.stdin.isTTY) resolve("");
+  });
 }
 
 function isSeverity(v: unknown): v is ParsedArgs["minSeverity"] {
@@ -153,28 +157,4 @@ function throwUsage(msg: string): never {
   process.exit(2);
 }
 
-export { HELP, isSupportedInput };
-
-function isSupportedInput(path: string): boolean {
-  const ext = extname(path).toLowerCase();
-  return [
-    ".ts",
-    ".tsx",
-    ".mts",
-    ".cts",
-    ".js",
-    ".mjs",
-    ".cjs",
-    ".jsx",
-    ".py",
-    ".go",
-    ".rs",
-    ".java",
-    ".kt",
-    ".rb",
-    ".php",
-    ".cs",
-    ".patch",
-    ".diff",
-  ].includes(ext);
-}
+export { HELP };

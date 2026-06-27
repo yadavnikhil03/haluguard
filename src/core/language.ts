@@ -14,7 +14,7 @@ const EXT_MAP: Record<string, FileLanguage> = {
   ".rs": "rust",
   ".java": "java",
   ".kt": "java",
-  ".rb": "ruby",
+
   ".php": "php",
   ".cs": "csharp",
 };

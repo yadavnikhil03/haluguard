@@ -16,19 +16,20 @@ export interface DetectorModule {
   create(): Detector;
 }
 
-const modules: DetectorModule[] = [];
+const registry = new Map<string, Detector>();
 
 export function registerDetector(mod: DetectorModule): void {
-  if (modules.some((m) => m.create().id === mod.create().id)) {
-    throw new Error(`Detector "${mod.create().id}" is already registered`);
+  const detector = mod.create();
+  if (registry.has(detector.id)) {
+    throw new Error(`Detector "${detector.id}" is already registered`);
   }
-  modules.push(mod);
+  registry.set(detector.id, detector);
 }
 
 export function listDetectors(): Detector[] {
-  return modules.map((m) => m.create());
+  return Array.from(registry.values());
 }
 
 export function getDetector(id: string): Detector | undefined {
-  return listDetectors().find((d) => d.id === id);
+  return registry.get(id);
 }

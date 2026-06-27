@@ -49,7 +49,6 @@ export type FileLanguage =
   | "go"
   | "rust"
   | "java"
-  | "ruby"
   | "php"
   | "csharp"
   | "unknown";

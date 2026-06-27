@@ -1,4 +1,5 @@
 import { hallucinatedApiDetector } from "../detectors/hallucinated-apis.js";
+import { maliciousPackageDetector } from "../detectors/malicious-packages.js";
 import { type Detector, listDetectors, registerDetector } from "../detectors/registry.js";
 import { secretsDetector } from "../detectors/secrets.js";
 import { stubsDetector } from "../detectors/stubs.js";
@@ -25,6 +26,7 @@ export function registerBuiltinDetectors(): void {
   registerDetector({ create: () => secretsDetector });
   registerDetector({ create: () => hallucinatedApiDetector });
   registerDetector({ create: () => stubsDetector });
+  registerDetector({ create: () => maliciousPackageDetector });
   builtinsRegistered = true;
 }
 

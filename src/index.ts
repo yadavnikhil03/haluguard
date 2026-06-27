@@ -12,6 +12,7 @@ export {
 } from "./detectors/registry.js";
 export { secretsDetector } from "./detectors/secrets.js";
 export { hallucinatedApiDetector } from "./detectors/hallucinated-apis.js";
+export { maliciousPackageDetector } from "./detectors/malicious-packages.js";
 export { stubsDetector } from "./detectors/stubs.js";
 export { renderReport } from "./reporters/cli-reporter.js";
 export { renderSarif } from "./reporters/sarif-reporter.js";
