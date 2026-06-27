@@ -28,27 +28,61 @@ All analysis is performed client-side, ensuring complete data privacy with zero 
 
 HaluGuard is designed for frictionless integration into continuous integration (CI) pipelines or local pre-commit hooks.
 
-### Direct Execution
-
-For immediate analysis without persistent installation, execute the tool directly via `npx`:
+### Quick Start — scan your own files
 
 ```sh
-# Analyze a specific file
-npx github:yadavnikhil03/haluguard src/auth.ts
-```
-
-### Local Installation
-
-To install the executable globally across your environment:
-
-```sh
+# 1. Clone and install globally
 git clone https://github.com/yadavnikhil03/haluguard.git
 cd haluguard
 npm install -g .
 
-# Execute analysis on target files
-haluguard src/auth.ts
+# 2. Run against any file in your project (replace the path with your own file)
+haluguard path/to/your/file.ts
+
+# Try the bundled demo to see HaluGuard catch real issues instantly:
+haluguard examples/vulnerable-demo.ts
 ```
+
+> **Note:** Pass the path to a file that exists on your machine.
+> Running `haluguard src/auth.ts` only works if `src/auth.ts` exists in your current directory.
+
+### Run without installing (via npx)
+
+```sh
+# Clone first, then run with npx against a local file
+git clone https://github.com/yadavnikhil03/haluguard.git
+cd haluguard
+npx . examples/vulnerable-demo.ts
+```
+
+Or if you want to run directly from GitHub against files in your **own** project:
+
+```sh
+# Run from inside your project directory
+cd your-project
+npx github:yadavnikhil03/haluguard path/to/your/file.ts
+```
+
+### Scan a git diff (most powerful usage)
+
+```sh
+# Scan only the lines changed by AI in the last commit
+git diff HEAD~1 | haluguard --stdin
+
+# Scan staged changes before committing
+git diff --cached | haluguard --stdin
+
+# In a PR review — scan everything changed vs main
+git diff origin/main...HEAD | haluguard --stdin --fail-on high
+```
+
+### Install a pre-commit git hook
+
+```sh
+haluguard --init-hook
+```
+
+This installs a hook that automatically scans your staged diff before every `git commit`.
 
 ### GitHub Actions Integration
 
@@ -69,7 +103,6 @@ jobs:
         with:
           node-version: 18
       - name: Run HaluGuard
-        # Utilizes the action defined in the repository
         uses: yadavnikhil03/haluguard@main
 ```
 
@@ -79,6 +112,16 @@ False positives can be programmatically suppressed using inline directives:
 
 ```typescript
 const myCustomMethod = library.customMethod(); // haluguard: ignore
+```
+
+A `.haluguard.yml` config file is also supported at the project root:
+
+```yaml
+min_severity: medium
+fail_on: high
+ignore:
+  - "**/*.test.ts"
+  - "vendor/**"
 ```
 
 ## VS Code Extension
