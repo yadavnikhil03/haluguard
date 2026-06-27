@@ -4,8 +4,12 @@
   "description": "Catch AI hallucinations before they ship. Detects invented APIs, leaked secrets, malicious packages, and stubs in AI-generated code. Local-first, zero-config, no cloud.",
   "type": "module",
   "license": "Apache-2.0",
+<<<<<<< HEAD
   "author": "yadavnikhil03 <nikhil181245@gmail.com>",
   "funding": "https://github.com/sponsors/yadavnikhil03",
+=======
+  "author": "yadavnikhil03",
+>>>>>>> 9274cf005775e5cadfff20dbc77596908bf7590e
   "homepage": "https://github.com/yadavnikhil03/haluguard",
   "repository": {
     "type": "git",
@@ -37,7 +41,12 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "action.yml", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -60,6 +69,6 @@
     "@types/node": "^22.10.0",
     "tsup": "^8.3.6",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.9"
   }
 }

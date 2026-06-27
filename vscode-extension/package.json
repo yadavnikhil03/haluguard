@@ -1,0 +1,67 @@
+{
+  "name": "haluguard-vscode",
+  "displayName": "HaluGuard",
+  "description": "Detect hallucinated APIs, leaked secrets, and stubs in AI-generated code",
+  "version": "0.1.0",
+  "publisher": "yadavnikhil03",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Linters", "Programming Languages"],
+  "keywords": ["ai", "hallucination", "copilot", "cursor", "static-analysis", "security"],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact",
+    "onLanguage:python",
+    "onLanguage:rust",
+    "onLanguage:java",
+    "onLanguage:php",
+    "onLanguage:csharp"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "HaluGuard",
+      "properties": {
+        "haluguard.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable HaluGuard analysis"
+        },
+        "haluguard.runOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run analysis when a file is saved"
+        },
+        "haluguard.runOnType": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run analysis as you type (may be slower on large files)"
+        },
+        "haluguard.minSeverity": {
+          "type": "string",
+          "default": "info",
+          "enum": ["info", "low", "medium", "high", "critical"],
+          "description": "Minimum severity level to display"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yadavnikhil03/haluguard.git"
+  }
+}

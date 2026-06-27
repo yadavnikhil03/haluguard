@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/yadavnikhil03/haluguard/actions"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/haluguard.yml?style=flat-square"></a>
+  <a href="https://github.com/yadavnikhil03/haluguard/actions"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/ci.yml?style=flat-square"></a>
   <img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-3DA639?style=flat-square">
   <img alt="node" src="https://img.shields.io/badge/node-%3E%3D18-cc3366?style=flat-square">
   <img alt="tests" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/ci.yml?style=flat-square&label=tests">
@@ -78,9 +78,21 @@ jobs:
 False positives can be programmatically suppressed using inline directives:
 
 ```typescript
-// Suppress analysis for a specific line
 const myCustomMethod = library.customMethod(); // haluguard: ignore
 ```
+
+## VS Code Extension
+
+HaluGuard ships with a VS Code extension that provides real-time diagnostics as you code. Hallucinated APIs, leaked secrets, and stubs appear as squiggly underlines directly in the editor.
+
+```sh
+npm run build
+cd vscode-extension
+npm install
+npm run compile
+```
+
+Then press **F5** in VS Code to launch the Extension Development Host. See the [extension README](vscode-extension/README.md) for configuration options.
 
 ## Contributing
 
