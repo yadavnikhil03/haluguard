@@ -4,9 +4,9 @@
 
 <p align="center">
   <a href="https://github.com/yadavnikhil03/haluguard/actions"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/ci.yml?style=flat-square"></a>
+  <a href="https://www.npmjs.com/package/haluguard"><img alt="npm" src="https://img.shields.io/npm/v/haluguard?style=flat-square&color=cc3366"></a>
   <img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-3DA639?style=flat-square">
   <img alt="node" src="https://img.shields.io/badge/node-%3E%3D18-cc3366?style=flat-square">
-  <img alt="tests" src="https://img.shields.io/github/actions/workflow/status/yadavnikhil03/haluguard/ci.yml?style=flat-square&label=tests">
   <img alt="config" src="https://img.shields.io/badge/zero%20config-22c55e?style=flat-square">
 </p>
 
@@ -26,67 +26,54 @@ All analysis is performed client-side, ensuring complete data privacy with zero 
 
 ## Installation and Usage
 
-HaluGuard is designed for frictionless integration into continuous integration (CI) pipelines or local pre-commit hooks.
-
-### Quick Start — scan your own files
+### Zero-install — run directly with npx
 
 ```sh
-# 1. Clone and install globally
-git clone https://github.com/yadavnikhil03/haluguard.git
-cd haluguard
-npm install -g .
+# Scan any file in your project instantly
+npx haluguard src/index.ts
 
-# 2. Run against any file in your project (replace the path with your own file)
-haluguard path/to/your/file.ts
+# Scan your entire AI-generated diff before merging
+git diff origin/main | npx haluguard --stdin
 
-# Try the bundled demo to see HaluGuard catch real issues instantly:
-haluguard examples/vulnerable-demo.ts
+# Try the demo — see what real detections look like
+npx haluguard --help
 ```
 
-> **Note:** Pass the path to a file that exists on your machine.
-> Running `haluguard src/auth.ts` only works if `src/auth.ts` exists in your current directory.
+No cloning. No config. No folders created in your project.
 
-### Run without installing (via npx)
+### Permanent global install
 
 ```sh
-# Clone first, then run with npx against a local file
-git clone https://github.com/yadavnikhil03/haluguard.git
-cd haluguard
-npx . examples/vulnerable-demo.ts
+npm install -g haluguard
+
+haluguard src/index.ts
+haluguard src/auth.ts src/api.ts src/utils.ts
 ```
 
-Or if you want to run directly from GitHub against files in your **own** project:
+### Scan a git diff (recommended for AI-assisted projects)
+
+This is the most powerful usage — scan only the lines your AI assistant actually wrote:
 
 ```sh
-# Run from inside your project directory
-cd your-project
-npx github:yadavnikhil03/haluguard path/to/your/file.ts
-```
-
-### Scan a git diff (most powerful usage)
-
-```sh
-# Scan only the lines changed by AI in the last commit
+# Scan everything since your last commit
 git diff HEAD~1 | haluguard --stdin
 
 # Scan staged changes before committing
 git diff --cached | haluguard --stdin
 
-# In a PR review — scan everything changed vs main
+# In a PR — scan only lines changed vs main
 git diff origin/main...HEAD | haluguard --stdin --fail-on high
 ```
 
-### Install a pre-commit git hook
+### Pre-commit hook (auto-scan before every commit)
 
 ```sh
 haluguard --init-hook
 ```
 
-This installs a hook that automatically scans your staged diff before every `git commit`.
+Installs a git hook that automatically scans your staged diff on every `git commit`. No setup required.
 
 ### GitHub Actions Integration
-
-To enforce analysis as part of your CI pipeline, integrate HaluGuard into your repository's workflow:
 
 ```yaml
 name: HaluGuard Analysis
@@ -99,16 +86,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Run HaluGuard
-        uses: yadavnikhil03/haluguard@main
+      - name: Run HaluGuard on PR diff
+        run: |
+          npx haluguard --version
+          git diff origin/${{ github.base_ref }}...HEAD | npx haluguard --stdin --fail-on high
 ```
 
 ## Configuration and Suppression
 
-False positives can be programmatically suppressed using inline directives:
+False positives can be suppressed using inline directives:
 
 ```typescript
 const myCustomMethod = library.customMethod(); // haluguard: ignore

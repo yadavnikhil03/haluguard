@@ -37,7 +37,7 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "action.yml", "README.md", "LICENSE"],
+  "files": ["dist", "examples", "action.yml", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -46,6 +46,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run lint && npm run build && npm test"
   },
   "engines": {
